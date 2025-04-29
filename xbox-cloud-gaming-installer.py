@@ -642,8 +642,9 @@ def main():
         log("Microsoft Edge is already installed")
     else:
         log("Installing Microsoft Edge via Flatpak...")
+        # Use --user flag to install for the current user only
         install_result = run_command(
-            ["flatpak", "install", "flathub", "com.microsoft.Edge", "-y"],
+            ["flatpak", "install", "flathub", "com.microsoft.Edge", "-y", "--user"],
             check=False,
             debug=debug_mode,
         )
@@ -653,7 +654,7 @@ def main():
         else:
             log("Failed to install Microsoft Edge")
             log("Please try installing it manually with this command:")
-            log("flatpak install flathub com.microsoft.Edge -y")
+            log("flatpak install flathub com.microsoft.Edge -y --user")
             return
 
     # Step 2: Configure Edge for udev access
