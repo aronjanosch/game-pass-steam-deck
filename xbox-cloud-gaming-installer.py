@@ -6,11 +6,13 @@ Automates the process of setting up Xbox Cloud Gaming through Microsoft Edge.
 import os
 import sys
 import subprocess
-import requests
 import shutil
 import re
 import hashlib
 import time
+import urllib.request
+import urllib.error
+from urllib.parse import urlparse
 
 # Artwork URLs
 ARTWORK = {
@@ -45,15 +47,25 @@ def run_command(cmd, check=True):
         return None
 
 def download_file(url, destination):
-    """Download a file from a URL to a destination"""
+    """Download a file from a URL to a destination using urllib"""
     try:
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(os.path.abspath(destination)), exist_ok=True)
         
-        with open(destination, 'wb') as f:
-            shutil.copyfileobj(response.raw, f)
+        # Setup request with a user agent to avoid potential blocks
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+        }
+        req = urllib.request.Request(url, headers=headers)
+        
+        # Download the file
+        with urllib.request.urlopen(req) as response, open(destination, 'wb') as out_file:
+            shutil.copyfileobj(response, out_file)
         
         return True
+    except urllib.error.URLError as e:
+        log(f"Error downloading {url}: {e}")
+        return False
     except Exception as e:
         log(f"Error downloading {url}: {e}")
         return False
